@@ -1,0 +1,112 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>// Skapa en canvas och lägga till den till sidan
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        document.body.style.margin = '0';
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        document.body.appendChild(canvas);
+        
+        // Fyrverkeri klass
+        class Firework {
+          constructor(x, y, colors) {
+            this.x = x;
+            this.y = y;
+            this.colors = colors;
+            this.particles = [];
+        
+            for (let i = 0; i < 100; i++) {
+              const angle = Math.random() * 2 * Math.PI;
+              const speed = Math.random() * 4 + 1;
+              this.particles.push({
+                x: this.x,
+                y: this.y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                alpha: 1
+              });
+            }
+          }
+        
+          draw() {
+            this.particles.forEach(p => {
+              ctx.fillStyle = `rgba(${this.colors[0]}, ${this.colors[1]}, ${this.colors[2]}, ${p.alpha})`;
+              ctx.beginPath();
+              ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI);
+              ctx.fill();
+            });
+          }
+        
+          update() {
+            this.particles.forEach(p => {
+              p.x += p.vx;
+              p.y += p.vy;
+              p.alpha -= 0.02;
+            });
+        
+            this.particles = this.particles.filter(p => p.alpha > 0);
+          }
+        
+          isDone() {
+            return this.particles.length === 0;
+          }
+        }
+        
+        let fireworks = [];
+        
+        // Animerad text
+        const text = "GOTT NYTT ÅR 2025!";
+        const textGradient = ctx.createLinearGradient(0, canvas.height / 2, canvas.width, canvas.height / 2);
+        textGradient.addColorStop(0, 'cyan');
+        textGradient.addColorStop(0.5, 'magenta');
+        textGradient.addColorStop(1, 'lime');
+        
+        function drawText() {
+          ctx.font = `bold 80px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.strokeStyle = textGradient;
+          ctx.lineWidth = 3;
+          ctx.shadowColor = 'cyan';
+          ctx.shadowBlur = 15;
+        
+          ctx.strokeText(text, canvas.width / 2, canvas.height / 2);
+        }
+        
+        // Animeringsloopen
+        function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+          if (Math.random() < 0.05) {
+            const x = Math.random() * canvas.width;
+            const y = Math.random() * canvas.height / 2;
+            const colors = [
+              Math.floor(Math.random() * 256),
+              Math.floor(Math.random() * 256),
+              Math.floor(Math.random() * 256)
+            ];
+            fireworks.push(new Firework(x, y, colors));
+          }
+        
+          fireworks.forEach((fw, index) => {
+            fw.update();
+            fw.draw();
+            if (fw.isDone()) fireworks.splice(index, 1);
+          });
+        
+          drawText();
+        
+          requestAnimationFrame(animate);
+        }
+        
+        animate();
+        </script>
+    
+</body>
+</html>
